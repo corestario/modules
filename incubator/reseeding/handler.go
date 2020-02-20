@@ -17,7 +17,7 @@ func GenericHandler(k Keeper, stakingKeeper staking.Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 		switch msg := msg.(type) {
 		case types.MsgSeed:
-			HandleMsgSeed(ctx, msg, k, stakingKeeper)
+			return HandleMsgSeed(ctx, msg, k, stakingKeeper)
 		default:
 			errMsg := fmt.Sprintf("unrecognized reseeding message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -45,20 +45,10 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 		return sdk.NewError(types.DefaultCodespace, 0, err.Error()).Result()
 	}
 
-	if _, ok := seeds[msg.Sender.String()]; ok {
-		return sdk.NewError(types.DefaultCodespace, 0, "duplicate seeds from validator %s", msg.Sender.String()).Result()
-	}
-
-	// Check that we have identical seeds.
-	for _, seed := range seeds {
-		if !bytes.Equal(seed, msg.Seed) {
-			k.ResetSeeds(ctx)
-			return sdk.NewError(types.DefaultCodespace, 0, "mismatching seeds, %+v", seeds).Result()
-		}
-	}
+	seeds.Add(msg.Seed, msg.Sender.String())
 
 	// We have all necessary seeds.
-	if len(validators) == len(seeds)+1 {
+	if seeds.GetVotesForSeed(msg.Seed) > len(validators)*(2/3) {
 		// All good, set current seed.
 		k.SetCurrentSeed(ctx, msg.Seed)
 

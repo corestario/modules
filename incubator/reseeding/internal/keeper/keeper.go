@@ -37,16 +37,16 @@ func (k Keeper) StoreSeed(ctx sdk.Context, sender sdk.Address, seed []byte) (err
 		return fmt.Errorf("failed to get seeds: %w", err)
 	}
 
-	seeds[sender.String()] = seed
+	seeds.Add(seed, sender.String())
 	bz, _ := json.Marshal(seeds)
 	store.Set([]byte(seedsKey), bz)
 
 	return nil
 }
 
-func (k Keeper) GetSeeds(ctx sdk.Context) (map[string][]byte, error) {
+func (k Keeper) GetSeeds(ctx sdk.Context) (types.Seeds, error) {
 	store := ctx.KVStore(k.storeKey)
-	var seeds = make(map[string][]byte)
+	var seeds = make(types.Seeds)
 	if err := json.Unmarshal(store.Get([]byte(seedsKey)), &seeds); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal seeds: %w", err)
 	}
@@ -57,7 +57,7 @@ func (k Keeper) GetSeeds(ctx sdk.Context) (map[string][]byte, error) {
 func (k Keeper) ResetSeeds(ctx sdk.Context) {
 	store := ctx.KVStore(k.storeKey)
 
-	bz, _ := json.Marshal(make(map[string][]byte))
+	bz, _ := json.Marshal(make(types.Seeds))
 	store.Set([]byte(seedsKey), bz)
 }
 
