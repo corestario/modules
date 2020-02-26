@@ -12,7 +12,7 @@ func BeginBlocker(ctx sdk.Context, k keeper.Keeper) {
 }
 
 // Called every block, update validator set
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
+func EndBlocker(ctx sdk.Context, k keeper.Keeper) abci.ModuleEndBlock {
 	seed := k.GetCurrentSeed(ctx)
 	if len(seed) > 0 {
 		k.ResetCurrentSeed(ctx)
@@ -20,5 +20,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
 
 	// TODO: change []abci.ValidatorUpdate to a new type that can hold the seed,
 	// set the seed.
-	return []abci.ValidatorUpdate{}
+	return abci.ModuleEndBlock{
+		Seed: seed,
+	}
 }
