@@ -20,4 +20,5 @@ var (
 	NewGenesisState     = types.NewGenesisState
 	DefaultGenesisState = types.DefaultGenesisState
 	ValidateGenesis     = types.ValidateGenesis
+	RegisterCodec       = types.RegisterCodec
 )
