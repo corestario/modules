@@ -6,7 +6,8 @@ import (
 )
 
 type (
-	Keeper = keeper.Keeper
+	Keeper       = keeper.Keeper
+	GenesisState = types.GenesisState
 )
 
 const (
@@ -14,11 +15,15 @@ const (
 	ModuleName       = types.ModuleName
 	StoreKey         = types.StoreKey
 	RouterKey        = types.RouterKey
+	QuerierRoute     = types.QuerierRoute
 )
 
 var (
+	NewQuerier          = keeper.NewQuerier
+	RegisterInvariants  = keeper.RegisterInvariants
 	NewGenesisState     = types.NewGenesisState
 	DefaultGenesisState = types.DefaultGenesisState
 	ValidateGenesis     = types.ValidateGenesis
 	RegisterCodec       = types.RegisterCodec
+	ModuleCdc           = types.ModuleCdc
 )
