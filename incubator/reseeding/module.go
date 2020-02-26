@@ -6,11 +6,6 @@ import (
 	"encoding/json"
 	"math/rand"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
-
-	abci "github.com/tendermint/tendermint/abci/types"
-
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -19,6 +14,9 @@ import (
 	"github.com/cosmos/modules/incubator/reseeding/client/cli"
 	"github.com/cosmos/modules/incubator/reseeding/client/rest"
 	"github.com/cosmos/modules/incubator/reseeding/simulation"
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 var (
