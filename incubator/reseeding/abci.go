@@ -16,6 +16,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) abci.ModuleEndBlock {
 	seed := k.GetCurrentSeed(ctx)
 	if len(seed) > 0 {
 		k.ResetCurrentSeed(ctx)
+		k.ResetSeeds(ctx)
 	}
 
 	// TODO: change []abci.ValidatorUpdate to a new type that can hold the seed,
