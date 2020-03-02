@@ -159,6 +159,6 @@ func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock module end-block
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) abci.ModuleEndBlock {
 	return EndBlocker(ctx, am.keeper)
 }
