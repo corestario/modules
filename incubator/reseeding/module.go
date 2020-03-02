@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"math/rand"
 
+	"github.com/cosmos/cosmos-sdk/x/staking"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -97,7 +99,8 @@ type AppModule struct {
 	AppModuleBasic
 	AppModuleSimulation
 
-	keeper Keeper
+	stakingKeeper staking.Keeper
+	keeper        Keeper
 }
 
 // NewAppModule creates a new AppModule object
@@ -126,7 +129,7 @@ func (AppModule) Route() string {
 
 // NewHandler module handler
 func (am AppModule) NewHandler() sdk.Handler {
-	return GenericHandler(am.keeper)
+	return GenericHandler(am.keeper, am.stakingKeeper)
 }
 
 // QuerierRoute module querier route name

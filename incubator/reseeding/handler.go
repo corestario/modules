@@ -22,6 +22,7 @@ func GenericHandler(k Keeper, stakingKeeper staking.Keeper) sdk.Handler {
 			errMsg := fmt.Sprintf("unrecognized reseeding message type: %T", msg)
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
+		return sdk.Result{}
 	}
 }
 
