@@ -2,6 +2,7 @@ package reseeding
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -14,18 +15,17 @@ import (
 
 // GenericHandler routes the messages to the handlers
 func GenericHandler(k Keeper, stakingKeeper staking.Keeper) sdk.Handler {
-	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		switch msg := msg.(type) {
 		case types.MsgSeed:
 			return HandleMsgSeed(ctx, msg, k, stakingKeeper)
 		default:
-			errMsg := fmt.Sprintf("unrecognized reseeding message type: %T", msg)
-			return sdk.ErrUnknownRequest(errMsg).Result()
+			return nil, fmt.Errorf("unrecognized reseeding message type: %T", msg)
 		}
 	}
 }
 
-func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingKeeper staking.Keeper) sdk.Result {
+func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingKeeper staking.Keeper) (*sdk.Result, error) {
 	validators := stakingKeeper.GetAllValidators(ctx)
 
 	var isValidator bool
@@ -37,12 +37,12 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 	}
 
 	if !isValidator {
-		return sdk.NewError(types.DefaultCodespace, 0, "got a seed from a non-validator").Result()
+		return nil, errors.New("got a seed from a non-validator")
 	}
 
 	seeds, err := k.GetSeeds(ctx)
 	if err != nil {
-		return sdk.NewError(types.DefaultCodespace, 0, err.Error()).Result()
+		return nil, fmt.Errorf("failed to GetSeeds: %w", err)
 	}
 
 	seeds.Add(msg.Seed, msg.Sender.String())
@@ -63,12 +63,12 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 				sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 			),
 		})
-		return sdk.Result{Events: ctx.EventManager().Events()}
+		return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 	}
 
 	// We do not have enough validators, but the seed is O.K., save it and continue.
 	if err := k.StoreSeed(ctx, msg.Sender, msg.Seed); err != nil {
-		return sdk.NewError(types.DefaultCodespace, 0, err.Error()).Result()
+		return nil, fmt.Errorf("failed to StoreSeed: %w", err)
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -83,5 +83,6 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
 	})
-	return sdk.Result{Events: ctx.EventManager().Events()}
+
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

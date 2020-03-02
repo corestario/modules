@@ -1,6 +1,8 @@
 package types
 
 import (
+	"errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -29,12 +31,12 @@ func (msg MsgSeed) Route() string { return RouterKey }
 func (msg MsgSeed) Type() string { return "seed" }
 
 // ValidateBasic Implements Msg.
-func (msg MsgSeed) ValidateBasic() sdk.Error {
+func (msg MsgSeed) ValidateBasic() error {
 	if msg.Sender.Empty() {
-		return sdk.ErrInvalidAddress("invalid sender address")
+		return errors.New("invalid sender address")
 	}
 	if len(msg.Seed) == 0 {
-		return sdk.ErrInvalidAddress("invalid seed")
+		return errors.New("invalid seed")
 	}
 
 	return nil

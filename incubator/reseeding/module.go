@@ -1,28 +1,27 @@
 package reseeding
 
-// DONTCOVER
-
 import (
 	"encoding/json"
-	"math/rand"
+
+	"github.com/cosmos/cosmos-sdk/x/staking"
+
+	"github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	sim "github.com/cosmos/cosmos-sdk/x/simulation"
 	"github.com/cosmos/modules/incubator/reseeding/client/cli"
 	"github.com/cosmos/modules/incubator/reseeding/client/rest"
-	"github.com/cosmos/modules/incubator/reseeding/simulation"
+	"github.com/cosmos/modules/incubator/reseeding/internal/types"
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 var (
-	_ module.AppModule           = AppModule{}
-	_ module.AppModuleBasic      = AppModuleBasic{}
-	_ module.AppModuleSimulation = AppModuleSimulation{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 // AppModuleBasic app module basics object
@@ -42,13 +41,13 @@ func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
 
 // DefaultGenesis default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return ModuleCdc.MustMarshalJSON(DefaultGenesisState())
+	return types.ModuleCdc.MustMarshalJSON(DefaultGenesisState())
 }
 
 // ValidateGenesis module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
-	var data GenesisState
-	err := ModuleCdc.UnmarshalJSON(bz, &data)
+	var data types.GenesisState
+	err := types.ModuleCdc.UnmarshalJSON(bz, &data)
 	if err != nil {
 		return err
 	}
@@ -57,7 +56,7 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 
 // RegisterRESTRoutes registers rest routes
 func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr, ModuleCdc, RouterKey)
+	rest.RegisterRoutes(ctx, rtr, types.ModuleCdc, RouterKey)
 }
 
 // GetTxCmd gets the root tx command of this module
@@ -72,40 +71,20 @@ func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 
 //____________________________________________________________________________
 
-// AppModuleSimulation defines the module simulation functions used by the gov module.
-type AppModuleSimulation struct{}
-
-// RegisterStoreDecoder registers a decoder for reseeding module's types
-func (AppModuleSimulation) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
-	sdr[StoreKey] = simulation.DecodeStore
-}
-
-// GenerateGenesisState creates a randomized GenState of the reseeding module.
-func (AppModuleSimulation) GenerateGenesisState(simState *module.SimulationState) {
-	simulation.RandomizedGenState(simState)
-}
-
-// RandomizedParams doesn't create randomized reseeding param changes for the simulator.
-func (AppModuleSimulation) RandomizedParams(_ *rand.Rand) []sim.ParamChange {
-	return nil
-}
-
-//____________________________________________________________________________
-
 // AppModule supply app module
 type AppModule struct {
 	AppModuleBasic
-	AppModuleSimulation
 
-	keeper Keeper
+	keeper        Keeper
+	stakingKeeper staking.Keeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper Keeper) AppModule {
+func NewAppModule(keeper Keeper, stakingKeeper staking.Keeper) AppModule {
 	return AppModule{
-		AppModuleBasic:      AppModuleBasic{},
-		AppModuleSimulation: AppModuleSimulation{},
-		keeper:              keeper,
+		AppModuleBasic: AppModuleBasic{},
+		keeper:         keeper,
+		stakingKeeper:  stakingKeeper,
 	}
 }
 
@@ -115,9 +94,7 @@ func (AppModule) Name() string {
 }
 
 // RegisterInvariants registers the reseeding module invariants
-func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
-	RegisterInvariants(ir, am.keeper)
-}
+func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {}
 
 // Route module message route name
 func (AppModule) Route() string {
@@ -126,23 +103,23 @@ func (AppModule) Route() string {
 
 // NewHandler module handler
 func (am AppModule) NewHandler() sdk.Handler {
-	return GenericHandler(am.keeper)
+	return GenericHandler(am.keeper, am.stakingKeeper)
 }
 
 // QuerierRoute module querier route name
 func (AppModule) QuerierRoute() string {
-	return QuerierRoute
+	return ""
 }
 
 // NewQuerierHandler module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return NewQuerier(am.keeper)
+	return NewQuerier()
 }
 
 // InitGenesis module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState GenesisState
-	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	var genesisState types.GenesisState
+	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.keeper, genesisState)
 	return []abci.ValidatorUpdate{}
 }
@@ -150,7 +127,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 // ExportGenesis module export genesis
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
-	return ModuleCdc.MustMarshalJSON(gs)
+	return types.ModuleCdc.MustMarshalJSON(gs)
 }
 
 // BeginBlock module begin-block
@@ -159,4 +136,10 @@ func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock module end-block
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) abci.ModuleEndBlock {
 	return EndBlocker(ctx, am.keeper)
+}
+
+func NewQuerier() sdk.Querier {
+	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err error) {
+		return nil, errors.ErrUnknownRequest
+	}
 }
