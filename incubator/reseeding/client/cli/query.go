@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/modules/incubator/reseeding/internal/types"
 	"github.com/spf13/cobra"
@@ -14,9 +13,7 @@ func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Short: "Querying commands for the reseeding module",
 	}
 
-	reseedingQueryCmd.AddCommand(client.GetCommands(
-	// mock
-	)...)
+	reseedingQueryCmd.AddCommand()
 
 	return reseedingQueryCmd
 }

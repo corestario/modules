@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 	"github.com/cosmos/modules/incubator/reseeding/internal/types"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // GetTxCmd returns the transaction commands for this module
@@ -18,9 +18,9 @@ func GetTxCmd(storeKey string, cdc *codec.Codec) *cobra.Command {
 		Short: "Reseeding transactions subcommands",
 	}
 
-	reseedingTxCmd.AddCommand(client.PostCommands(
+	reseedingTxCmd.AddCommand(
 		GetCmdSendSeed(cdc),
-	)...)
+	)
 
 	return reseedingTxCmd
 }
@@ -32,7 +32,7 @@ func GetCmdSendSeed(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			txBldr := authtypes.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := authtypes.NewTxBuilderFromCLI(os.Stdin).WithTxEncoder(utils.GetTxEncoder(cdc))
 
 			sender, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {

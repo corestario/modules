@@ -10,10 +10,9 @@ type (
 )
 
 const (
-	DefaultCodespace = types.DefaultCodespace
-	ModuleName       = types.ModuleName
-	StoreKey         = types.StoreKey
-	RouterKey        = types.RouterKey
+	ModuleName = types.ModuleName
+	StoreKey   = types.StoreKey
+	RouterKey  = types.RouterKey
 )
 
 var (
@@ -21,4 +20,5 @@ var (
 	DefaultGenesisState = types.DefaultGenesisState
 	ValidateGenesis     = types.ValidateGenesis
 	RegisterCodec       = types.RegisterCodec
+	NewKeeper           = keeper.NewKeeper
 )
