@@ -18,7 +18,14 @@ func GenericHandler(k Keeper, stakingKeeper staking.Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		switch msg := msg.(type) {
 		case types.MsgSeed:
-			return HandleMsgSeed(ctx, msg, k, stakingKeeper)
+			res, err := HandleMsgSeed(ctx, msg, k, stakingKeeper)
+			if err != nil {
+				fmt.Println("ERROR:", err.Error())
+			}
+			if res != nil {
+				fmt.Println("RESPONSE:", res.Events)
+			}
+			return res, err
 		default:
 			return nil, fmt.Errorf("unrecognized reseeding message type: %T", msg)
 		}
