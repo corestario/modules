@@ -37,7 +37,7 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 
 	var isValidator bool
 	for _, validator := range validators {
-		if bytes.Equal(validator.ConsPubKey.Address().Bytes(), msg.Sender.Bytes()) {
+		if bytes.Equal(msg.Sender.Bytes(), validator.OperatorAddress.Bytes()) {
 			isValidator = true
 			break
 		}

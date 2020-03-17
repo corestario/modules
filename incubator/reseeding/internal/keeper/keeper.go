@@ -47,7 +47,11 @@ func (k Keeper) StoreSeed(ctx sdk.Context, sender sdk.Address, seed []byte) (err
 func (k Keeper) GetSeeds(ctx sdk.Context) (types.Seeds, error) {
 	store := ctx.KVStore(k.storeKey)
 	var seeds = make(types.Seeds)
-	if err := json.Unmarshal(store.Get([]byte(seedsKey)), &seeds); err != nil {
+	seedsBytes := store.Get([]byte(seedsKey))
+	if seedsBytes == nil {
+		return seeds, nil
+	}
+	if err := json.Unmarshal(seedsBytes, &seeds); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal seeds: %w", err)
 	}
 
