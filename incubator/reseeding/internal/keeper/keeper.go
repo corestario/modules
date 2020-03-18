@@ -30,14 +30,9 @@ func NewKeeper(cdc *codec.Codec, storeKey sdk.StoreKey) Keeper {
 	}
 }
 
-func (k Keeper) StoreSeed(ctx sdk.Context, sender sdk.Address, seed []byte) (err error) {
+func (k Keeper) StoreSeed(ctx sdk.Context, seeds types.Seeds) (err error) {
 	store := ctx.KVStore(k.storeKey)
-	seeds, err := k.GetSeeds(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get seeds: %w", err)
-	}
 
-	seeds.Add(seed, sender.String())
 	bz, _ := json.Marshal(seeds)
 	store.Set([]byte(seedsKey), bz)
 

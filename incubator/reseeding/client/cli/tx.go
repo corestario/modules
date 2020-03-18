@@ -32,20 +32,15 @@ func GetCmdSendSeed(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "send [sender] [seed]",
 		Short: "send a seed",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 
-			sender, err := sdk.AccAddressFromBech32(args[0])
-			if err != nil {
-				return err
-			}
+			seedStr := args[0]
 
-			seedStr := args[1]
-
-			msg := types.NewMsgSeed(sender, []byte(seedStr))
+			msg := types.NewMsgSeed(cliCtx.GetFromAddress(), []byte(seedStr))
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
