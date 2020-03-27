@@ -5,8 +5,10 @@ import (
 	"encoding/hex"
 )
 
+// SeedVotes is a map from votes sender to an empty struct.
 type SeedVotes map[string]struct{}
 
+// Seeds is a map from a seed to its senders.
 type Seeds map[string]SeedVotes
 
 func getKey(seed []byte) string {
