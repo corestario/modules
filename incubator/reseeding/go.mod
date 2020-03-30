@@ -11,7 +11,6 @@ require (
 )
 
 replace (
-	github.com/corestario/dkglib => ./../../../dkglib
 	github.com/cosmos/cosmos-sdk => ./../../../cosmos-sdk
 	github.com/tendermint/tendermint => ./../../../tendermint
 	go.dedis.ch/kyber/v3 => ./../../../kyber
