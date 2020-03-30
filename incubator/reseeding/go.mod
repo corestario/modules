@@ -1,6 +1,6 @@
-module github.com/cosmos/modules/incubator/reseeding
+module github.com/corestario/modules/incubator/reseeding
 
-go 1.13
+go 1.12
 
 require (
 	github.com/cosmos/cosmos-sdk v0.34.4-0.20191013030331-92ea174ea6e6

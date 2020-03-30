@@ -2,7 +2,7 @@ package reseeding
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/modules/incubator/reseeding/internal/keeper"
+	"github.com/corestario/modules/incubator/reseeding/internal/keeper"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 

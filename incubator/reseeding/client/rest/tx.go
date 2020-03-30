@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/cosmos/modules/incubator/reseeding/internal/types"
+	"github.com/corestario/modules/incubator/reseeding/internal/types"
 	"github.com/gorilla/mux"
 )
 

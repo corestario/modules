@@ -1,8 +1,8 @@
 package reseeding
 
 import (
-	"github.com/cosmos/modules/incubator/reseeding/internal/keeper"
-	"github.com/cosmos/modules/incubator/reseeding/internal/types"
+	"github.com/corestario/modules/incubator/reseeding/internal/keeper"
+	"github.com/corestario/modules/incubator/reseeding/internal/types"
 )
 
 type (

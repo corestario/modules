@@ -7,8 +7,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/cosmos/modules/incubator/reseeding/internal/keeper"
-	"github.com/cosmos/modules/incubator/reseeding/internal/types"
+	"github.com/corestario/modules/incubator/reseeding/internal/keeper"
+	"github.com/corestario/modules/incubator/reseeding/internal/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
