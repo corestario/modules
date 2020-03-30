@@ -11,7 +11,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/tendermint/tendermint v0.32.8
 	github.com/tendermint/tm-db v0.3.0
-	github.com/corestario/cosmos-utils/client master
+	github.com/corestario/cosmos-utils/client latest
 )
 
 replace (
