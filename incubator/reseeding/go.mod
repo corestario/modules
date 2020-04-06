@@ -6,7 +6,9 @@ require (
 	github.com/cosmos/cosmos-sdk v0.34.4-0.20191013030331-92ea174ea6e6
 	github.com/gorilla/mux v1.7.3
 	github.com/spf13/cobra v0.0.5
+	github.com/stretchr/testify v1.4.0
 	github.com/tendermint/tendermint v0.32.8
+	github.com/tendermint/tm-db v0.3.0
 )
 
 replace (

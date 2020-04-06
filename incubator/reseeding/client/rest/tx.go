@@ -37,6 +37,7 @@ func sendSeedHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFu
 
 		baseReq := req.BaseReq.Sanitize()
 		if !baseReq.ValidateBasic(w) {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "failed to validate request")
 			return
 		}
 

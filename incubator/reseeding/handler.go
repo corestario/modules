@@ -53,9 +53,13 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 	}
 
 	seeds.Add(msg.Seed, msg.Sender.String())
+	// We do not have enough validators, but the seed is O.K., save it and continue.
+	if err := k.StoreSeed(ctx, seeds); err != nil {
+		return nil, fmt.Errorf("failed to StoreSeed: %w", err)
+	}
 
 	// We have all necessary seeds.
-	if seeds.GetVotesForSeed(msg.Seed) > (len(validators)/3) * 2 {
+	if seeds.GetVotesForSeed(msg.Seed) >= (len(validators)/3)*2+1 {
 		// All good, set current seed.
 		k.SetCurrentSeed(ctx, msg.Seed)
 
@@ -71,11 +75,6 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 			),
 		})
 		return &sdk.Result{Events: ctx.EventManager().Events()}, nil
-	}
-
-	// We do not have enough validators, but the seed is O.K., save it and continue.
-	if err := k.StoreSeed(ctx, seeds); err != nil {
-		return nil, fmt.Errorf("failed to StoreSeed: %w", err)
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
