@@ -38,6 +38,9 @@ func (msg MsgSeed) ValidateBasic() error {
 	if len(msg.Seed) == 0 {
 		return errors.New("invalid seed")
 	}
+	if len(msg.Seed) > 1024*1024 {
+		return errors.New("seed is too large")
+	}
 
 	return nil
 }
