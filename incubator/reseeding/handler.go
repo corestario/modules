@@ -13,6 +13,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+const (
+	EventTypeNewCurrentSeed = "EventTypeNewCurrentSeed"
+	EventTypeSeedSaved      = "EventTypeSeedSaved"
+)
+
 // GenericHandler routes the messages to the handlers
 func GenericHandler(k Keeper, stakingKeeper staking.Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
@@ -20,11 +25,9 @@ func GenericHandler(k Keeper, stakingKeeper staking.Keeper) sdk.Handler {
 		case types.MsgSeed:
 			res, err := HandleMsgSeed(ctx, msg, k, stakingKeeper)
 			if err != nil {
-				fmt.Println("ERROR:", err.Error())
+				return nil, fmt.Errorf("failed to HandleMsgSeed: %v", err)
 			}
-			if res != nil {
-				fmt.Println("RESPONSE:", res.Events)
-			}
+
 			return res, err
 		default:
 			return nil, fmt.Errorf("unrecognized reseeding message type: %T", msg)
@@ -65,7 +68,7 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 
 		ctx.EventManager().EmitEvents(sdk.Events{
 			sdk.NewEvent(
-				"EventNewCurrentSeed",
+				EventTypeNewCurrentSeed,
 				sdk.NewAttribute("new_current_seed", string(msg.Seed)),
 			),
 			sdk.NewEvent(
@@ -79,7 +82,7 @@ func HandleMsgSeed(ctx sdk.Context, msg types.MsgSeed, k keeper.Keeper, stakingK
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			"EventSeedSaved",
+			EventTypeSeedSaved,
 			sdk.NewAttribute("seed_saved", string(msg.Seed)),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender.String()),
 		),
