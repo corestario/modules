@@ -2,13 +2,14 @@ package cli
 
 import (
 	"bufio"
+
+	"github.com/corestario/modules/incubator/reseeding/internal/types"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/corestario/modules/incubator/reseeding/internal/types"
 	"github.com/spf13/cobra"
 )
 

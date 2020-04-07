@@ -11,13 +11,13 @@ type SeedVotes map[string]struct{}
 // Seeds is a map from a seed to its senders.
 type Seeds map[string]SeedVotes
 
-func getKey(seed []byte) string {
+func GetSeedKey(seed []byte) string {
 	seedHash := md5.Sum(seed)
 	return hex.EncodeToString(seedHash[:])
 }
 
 func (s Seeds) Add(seed []byte, sender string) {
-	key := getKey(seed)
+	key := GetSeedKey(seed)
 	votes, ok := s[key]
 	if !ok {
 		votes = make(map[string]struct{})
@@ -27,5 +27,5 @@ func (s Seeds) Add(seed []byte, sender string) {
 }
 
 func (s Seeds) GetVotesForSeed(seed []byte) int {
-	return len(s[getKey(seed)])
+	return len(s[GetSeedKey(seed)])
 }
