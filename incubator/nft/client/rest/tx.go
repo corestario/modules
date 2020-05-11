@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	authclient "github.com/cosmos/cosmos-sdk/x/auth/client"
 	"github.com/cosmos/modules/incubator/nft/internal/types"
 
 	"github.com/gorilla/mux"
@@ -66,7 +66,7 @@ func transferNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handle
 		// create the message
 		msg := types.NewMsgTransferNFT(cliCtx.GetFromAddress(), recipient, req.Denom, req.ID)
 
-		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
+		authclient.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -92,7 +92,7 @@ func editNFTMetadataHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 		// create the message
 		msg := types.NewMsgEditNFTMetadata(cliCtx.GetFromAddress(), req.ID, req.Denom, req.TokenURI)
 
-		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
+		authclient.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -119,7 +119,7 @@ func mintNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFun
 		// create the message
 		msg := types.NewMsgMintNFT(cliCtx.GetFromAddress(), req.Recipient, req.ID, req.Denom, req.TokenURI)
 
-		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
+		authclient.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -143,6 +143,6 @@ func burnNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFun
 
 		// create the message
 		msg := types.NewMsgBurnNFT(cliCtx.GetFromAddress(), req.ID, req.Denom)
-		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
+		authclient.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }

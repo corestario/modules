@@ -18,13 +18,12 @@ import (
 	sim "github.com/cosmos/cosmos-sdk/x/simulation"
 	"github.com/cosmos/modules/incubator/nft/client/cli"
 	"github.com/cosmos/modules/incubator/nft/client/rest"
-	"github.com/cosmos/modules/incubator/nft/simulation"
+	"github.com/cosmos/modules/incubator/nft/internal/types"
 )
 
 var (
 	_ module.AppModule           = AppModule{}
 	_ module.AppModuleBasic      = AppModuleBasic{}
-	_ module.AppModuleSimulation = AppModuleSimulation{}
 )
 
 // AppModuleBasic app module basics object
@@ -43,12 +42,12 @@ func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
 }
 
 // DefaultGenesis default genesis state
-func (AppModuleBasic) DefaultGenesis() json.RawMessage {
+func (AppModuleBasic) DefaultGenesis(marshaler codec.JSONMarshaler) json.RawMessage {
 	return ModuleCdc.MustMarshalJSON(DefaultGenesisState())
 }
 
 // ValidateGenesis module validate genesis
-func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
+func (AppModuleBasic) ValidateGenesis(marshaler codec.JSONMarshaler, bz json.RawMessage) error {
 	var data GenesisState
 	err := ModuleCdc.UnmarshalJSON(bz, &data)
 	if err != nil {
@@ -74,40 +73,23 @@ func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 
 //____________________________________________________________________________
 
-// AppModuleSimulation defines the module simulation functions used by the gov module.
-type AppModuleSimulation struct{}
-
-// RegisterStoreDecoder registers a decoder for nft module's types
-func (AppModuleSimulation) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
-	sdr[StoreKey] = simulation.DecodeStore
-}
-
-// GenerateGenesisState creates a randomized GenState of the nft module.
-func (AppModuleSimulation) GenerateGenesisState(simState *module.SimulationState) {
-	simulation.RandomizedGenState(simState)
-}
-
-// RandomizedParams doesn't create randomized nft param changes for the simulator.
-func (AppModuleSimulation) RandomizedParams(_ *rand.Rand) []sim.ParamChange {
-	return nil
-}
-
-//____________________________________________________________________________
-
 // AppModule supply app module
 type AppModule struct {
 	AppModuleBasic
-	AppModuleSimulation
 
 	keeper Keeper
+
+	// Account keeper is used for testing purposes only
+	accountKeeper types.AccountKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper Keeper) AppModule {
+func NewAppModule(keeper Keeper, accountKeeper types.AccountKeeper) AppModule {
 	return AppModule{
-		AppModuleBasic:      AppModuleBasic{},
-		AppModuleSimulation: AppModuleSimulation{},
-		keeper:              keeper,
+		AppModuleBasic: AppModuleBasic{},
+
+		keeper:        keeper,
+		accountKeeper: accountKeeper,
 	}
 }
 
@@ -142,7 +124,7 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 }
 
 // InitGenesis module init-genesis
-func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(ctx sdk.Context, marshaler codec.JSONMarshaler, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
 	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, am.keeper, genesisState)
@@ -150,7 +132,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 }
 
 // ExportGenesis module export genesis
-func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
+func (am AppModule) ExportGenesis(ctx sdk.Context, marshaler codec.JSONMarshaler) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
 	return ModuleCdc.MustMarshalJSON(gs)
 }
@@ -161,4 +143,25 @@ func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock module end-block
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return EndBlocker(ctx, am.keeper)
+}
+
+// RegisterStoreDecoder registers a decoder for nft module's types
+//func (AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+//	sdr[StoreKey] = simulation.DecodeStore
+//}
+
+// ProposalContents doesn't return any content functions for governance proposals.
+func (AppModule) ProposalContents(_ module.SimulationState) []sim.WeightedProposalContent { return nil }
+
+// GenerateGenesisState creates a randomized GenState of the nft module.
+func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
+	//simulation.RandomizedGenState(simState)
+}
+
+// RandomizedParams doesn't create randomized nft param changes for the simulator.
+func (AppModule) RandomizedParams(_ *rand.Rand) []sim.ParamChange { return nil }
+
+// WeightedOperations doesn't return any operation for the nft module.
+func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.WeightedOperation {
+	return nil
 }
